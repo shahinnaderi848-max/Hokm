@@ -6,7 +6,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Unzip project
-        run: unzip -q *.zip -d project
+        run: |
+          unzip -q *.zip -d project
+          D=$(dirname "$(find project -name settings.gradle | head -1)")
+          echo "PROJ=$D" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -20,9 +23,9 @@ jobs:
       - name: Install SDK
         run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Build
-        working-directory: project
+        working-directory: ${{ env.PROJ }}
         run: gradle --no-daemon assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: HokmGold-apk
-          path: project/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.PROJ }}/app/build/outputs/apk/debug/app-debug.apk
